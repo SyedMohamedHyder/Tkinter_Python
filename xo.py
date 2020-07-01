@@ -14,4 +14,37 @@ def display_board():
     print(board[3]+"|"+board[4]+"|"+board[5])
 
 
-display_board()
+def main():
+
+    display_board()
+
+    while True:
+
+
+        x_chance()
+        display_board()
+        o_chance()
+        display_board()
+
+
+def x_chance():
+
+    position=input("Where do you want to insert \"X\" : ")
+    position=int(position)-1
+    if position<len(board) and board[position]=="-" :
+       board[position]="X"
+    else :
+       print ("Enter a valid position")
+       x_chance()
+
+def o_chance():
+
+    position=input("Where do you want to insert \"O\" : ")
+    position=int(position)-1
+    if position<len(board) and board[position]=="-" :
+       board[position]="O"
+    else :
+       print ("Enter a valid position")
+       o_chance()
+
+main()
