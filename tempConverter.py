@@ -1,17 +1,18 @@
 #!/c/Users/SYED/AppData/Local/Programs/Python/Python38-32/python
 
 from tkinter import *
-
-window=Tk()
+from tkinter import messagebox
 
 def tempconvert(*args):
+    try:
+       F_temp=float(F_entry.get())
+       c_temp=(F_temp-32)*(5/9)
+       c_label["text"]="{} {}".format(c_temp,"\N{DEGREE CELSIUS}")
+    except:
+       messagebox.showerror("ERROR","ERROR")
 
-    F_temp=float(F_entry.get())
-    c_temp=(F_temp-32)*(5/9)
-    c_label["text"]="{} {}".format(c_temp,"\N{DEGREE CELSIUS}")
-
+window=Tk()
 entryFrame=Frame(master=window)
-
 
 F_entry=Entry(master=entryFrame,width=10)
 F_entry.insert(0,"32")
