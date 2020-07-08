@@ -16,6 +16,7 @@ entryFrame=Frame(master=window)
 
 F_entry=Entry(master=entryFrame,width=10)
 F_entry.insert(0,"32")
+F_entry.focus_set()
 F_label=Label(master=entryFrame,text="\N{DEGREE FAHRENHEIT}")
 F_entry.grid(row=0,column=0,pady=10,sticky="e")
 F_label.grid(row=0,column=1,sticky="w")
