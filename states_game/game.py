@@ -6,18 +6,16 @@ import tkinter as tk
 import random
 from tkinter import messagebox
 
-
-
-
-
 window=tk.Tk()
 window.iconbitmap("flag.ico")
 window.title("Indian States Game")
-window.geometry("400x705")
+window.geometry("350x600")
 window.resizable(False,True)
 
 
 all_states_list=[]
+
+
 user_capital=tk.StringVar()
 
 
@@ -30,9 +28,10 @@ statusFrame=tk.Frame(master=window)
 capitalFrame=tk.Frame(master=window)
 status_capital_Frame=tk.Frame(master=window)
 
-total=10
 
-user_total=0
+user_state_total=0
+user_capital_total=0
+
 
 capital={"andhra pradesh":"amaravati",
 "arunachal pradesh":"itanagar",
@@ -84,11 +83,22 @@ def hide_all_frames():
         frame.grid_forget()
 
 
+def home():
+
+    global user_state_total
+    global user_capital_total
+
+    user_state_total=0
+
+    user_capital_total=0
+
+    hide_all_frames()
+
 def capital_answer(all_stato):
 
-    global user_total
+    global user_capital_total
 
-    if user_capital.get().lower()==capital[state]:
+    if user_capital.get().title()==capital[state].title():
 
        hintLabel["text"]=""
        hintLabel.grid(row=1,column=1)
@@ -96,17 +106,18 @@ def capital_answer(all_stato):
        submitLabel["text"]="Correct!"
        submitLabel.grid(row=7,column=1)
 
-       user_total+=1
+       user_capital_total+=1
 
-       if user_total==total:
+       if user_capital_total==capital_total:
+          user_capital_total=0
           hide_all_frames()
           messagebox.showinfo("GAME OVER","WINNER WINNER CHICKEN DINNER!")
 
        else:
 
-          status_capital_Label=tk.Label(master=status_capital_Frame,text="You have solved {} out of {}".format(user_total,total))
+          status_capital_Label=tk.Label(master=status_capital_Frame,text="You have solved {} out of {}".format(user_capital_total,capital_total))
           status_capital_Label.grid(row=0,column=0,sticky="e",padx=5)
-          #del all_stato[rando]
+          del all_stato[rando]
           submitButton.configure(state="disabled")
           next_capital_Button=tk.Button(master=capitalFrame,text="Next",command=lambda:capitals(all_stato))
           next_capital_Button.grid(row=8,column=1,padx=3,pady=2)
@@ -136,8 +147,11 @@ def capitals(all_statos):
     global status_capital_Frame
     global status_capital_Label
     global submitButton
+    global capital_total
 
     hide_all_frames()
+
+    capital_total=10
 
     option_states=[]
 
@@ -146,19 +160,19 @@ def capitals(all_statos):
 
     image_path="states/"+state+(".png")
 
-    option_states.append(capital[state])
+    option_states.append(capital[state].title())
 
     while len(option_states) < 3 :
 
         new_state=all_states_list[random.randint(0,len(all_states_list)-1)]
 
-        if capital[new_state] in option_states:
+        if capital[new_state].title() in option_states:
 
            continue
 
         else:
 
-           option_states.append(capital[new_state])
+           option_states.append(capital[new_state].title())
 
 
     random.shuffle(option_states)
@@ -166,7 +180,7 @@ def capitals(all_statos):
 
     image_path="states/"+state+(".png")
 
-    img=ImageTk.PhotoImage(Image.open(image_path))
+    img=ImageTk.PhotoImage(Image.open(image_path).resize((300,300)))
 
     capitalFrame=tk.Frame(master=window)
     capitalFrame.grid(row=0,column=0,sticky="nsew")
@@ -198,13 +212,13 @@ def capitals(all_statos):
     status_capital_Frame=tk.Frame(master=window,relief="sunken",bd=3)
     status_capital_Frame.grid(row=1,column=0,sticky="we")
 
-    status_capital_Label=tk.Label(master=status_capital_Frame,text="You have solved {} out of {}".format(user_total,total))
+    status_capital_Label=tk.Label(master=status_capital_Frame,text="You have solved {} out of {}".format(user_capital_total,capital_total))
     status_capital_Label.grid(row=0,column=0,padx=5)
 
 
 def state_answer(all_state):
 
-    global user_total
+    global user_state_total
 
     answer=answerEntry.get().lower().replace(" ","")
 
@@ -213,13 +227,14 @@ def state_answer(all_state):
        answerLabel["text"]="Correct!"
        answerLabel.grid(row=4,column=1)
 
-       user_total+=1
+       user_state_total+=1
 
-       if user_total==total:
+       if user_state_total==state_total:
+          user_state_total=0
           hide_all_frames()
           messagebox.showinfo("GAME OVER","WINNER WINNER CHICKEN DINNER!")
        else:
-          statusLabel=tk.Label(master=statusFrame,text="You have solved {} out of {}".format(user_total,total))
+          statusLabel=tk.Label(master=statusFrame,text="You have solved {} out of {}".format(user_state_total,state_total))
           statusLabel.grid(row=0,column=0,sticky="e",padx=5)
           del all_state[rando]
           answerButton.configure(state="disabled")
@@ -229,6 +244,8 @@ def state_answer(all_state):
     else:
        answerLabel["text"]="Incorrect ! Try Again"
        answerLabel.grid(row=4,column=1)
+
+
 
 def states(all_states):
 
@@ -240,22 +257,24 @@ def states(all_states):
     global answerLabel
     global statusFrame
     global answerButton
+    global state_total
 
 
     hide_all_frames()
+
+    state_total=10
 
     rando=random.randint(0,len(all_states)-1)
     state=all_states[rando]
     image_path="states/"+state+(".png")
 
-    img=ImageTk.PhotoImage(Image.open(image_path))
+    img=ImageTk.PhotoImage(Image.open(image_path).resize((300,300)))
 
     imageFrame=tk.Frame(master=window)
-    imageFrame.grid(row=0,column=0,sticky="nsew")
-
+    imageFrame.grid(row=0,column=0,sticky="nswe",padx=20)
 
     stateLabel=tk.Label(master=imageFrame,image=img)
-    stateLabel.grid(row=0,column=0,pady=5,columnspan=3)
+    stateLabel.grid(row=0,column=0,pady=5,columnspan=3,sticky="nswe")
 
     answerEntry=tk.Entry(master=imageFrame)
     answerEntry.grid(row=1,column=1,pady=10,sticky="ew")
@@ -269,7 +288,7 @@ def states(all_states):
     statusFrame=tk.Frame(master=window,relief="sunken",bd=3)
     statusFrame.grid(row=1,column=0,sticky="we")
 
-    statusLabel=tk.Label(master=statusFrame,text="You have solved {} out of {}".format(user_total,total))
+    statusLabel=tk.Label(master=statusFrame,text="You have solved {} out of {}".format(user_state_total,state_total))
     statusLabel.grid(row=0,column=0,padx=10)
 
     answerLabel=tk.Label(master=imageFrame,text="")
@@ -283,6 +302,19 @@ mymenu.add_cascade(label="Geography",menu=geomenu)
 geomenu.add_command(label="States",command=lambda:states(all_states_list))
 geomenu.add_command(label="State Capitals",command=lambda:capitals(all_states_list))
 geomenu.add_separator()
+geomenu.add_command(label="Home",command=home)
+geomenu.add_separator()
 geomenu.add_command(label="Exit",command=window.quit)
+
+
+mainFrame=tk.Frame(master=window)
+
+statesButton=tk.Button(master=mainFrame,text="Play States Game",width=30,height=5,bg="green",command=lambda:states(all_states_list))
+statesButton.grid(row=0,column=0,pady=70,padx=70)
+
+statesButton=tk.Button(master=mainFrame,text="Play Capitals Game",width=30,height=5,bg="blue",command=lambda:capitals(all_states_list))
+statesButton.grid(row=1,column=0,pady=(0,70),padx=70)
+
+mainFrame.grid(row=0,column=0,sticky="nswe")
 
 window.mainloop()
