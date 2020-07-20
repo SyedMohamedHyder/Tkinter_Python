@@ -9,10 +9,11 @@ import os
 import time
 from mutagen.mp3 import MP3
 from tkinter import ttk
+from PIL import ImageTk,Image
 
 window=Tk()
 window.title("MP3 Player")
-window.geometry("500x450")
+window.geometry("500x430")
 
 song_path_list=[]
 paused=False
@@ -372,10 +373,29 @@ def delete_many_songs():
 
 def volume(event):
 
+	global volume_meter
 	# Change volume according to the volume_meter value
 	# pygame has a volume range of 0 to 1
 	pygame.mixer.music.set_volume(volume_meter.get())
 	#dummy_label.config(text=volume_meter.get()*100)
+
+def display_volume_meter():
+
+	global display
+	global volume_meter
+
+	if display:
+
+		# Create volume_meter scale 
+		volume_meter=ttk.Scale(master=volumeFrame,from_=0,to=1,orient=HORIZONTAL,value=1,command=volume)
+		volume_meter.grid(row=1,column=1,sticky="w")
+		display=False
+
+	else:
+
+		volume_meter.grid_forget()
+		display=True
+
 
 # Create menus for our window
 
@@ -400,7 +420,7 @@ delete_menu.add_command(label="Delete All Songs",command=delete_many_songs)
 
 # Create a song box 
 
-song_box=Listbox(master=window,bg="black",fg="white",width=75,selectbackground="white",selectforeground="green",activestyle="none")
+song_box=Listbox(master=window,bg="white",fg="black",width=75,selectbackground="black",selectforeground="white",activestyle="none",font=("Arial",10))
 song_box.pack(pady=20,padx=20)
 
 # Load images for our buttons 
@@ -410,6 +430,7 @@ stop_image=PhotoImage(file="c:/Users/SYED/Desktop/RaspberryPi/mp3player/button_i
 play_image=PhotoImage(file="c:/Users/SYED/Desktop/RaspberryPi/mp3player/button_images/play.png")
 forward_image=PhotoImage(file="c:/Users/SYED/Desktop/RaspberryPi/mp3player/button_images/forward.png")
 backward_image=PhotoImage(file="c:/Users/SYED/Desktop/RaspberryPi/mp3player/button_images/backward.png")
+volume_image=ImageTk.PhotoImage(Image.open("c:/Users/SYED/Desktop/RaspberryPi/mp3player/button_images/volume.jpg"))
 
 # Create a Frame to hold all the Buttons
 
@@ -433,20 +454,22 @@ forward_button.grid(row=0,column=4,padx=10)
 backward_button=Button(master=buttonFrame,image=backward_image,bd=0,command=backward)
 backward_button.grid(row=0,column=0,padx=10)
 
-# Create slider
-
-music_slider=ttk.Scale(master=window,from_=0,to=100,orient=HORIZONTAL,value=0,length=400,command=slide)
-music_slider.pack(pady=40)
-
 # Create volume Frame
 
 volumeFrame=Frame(master=window)
 volumeFrame.pack()
 
-# Create volume_meter scale 
+# Create slider
 
-volume_meter=ttk.Scale(master=volumeFrame,from_=0,to=1,orient=HORIZONTAL,value=1,command=volume)
-volume_meter.grid(row=0,column=0,sticky="e")
+music_slider=ttk.Scale(master=volumeFrame,from_=0,to=100,orient=HORIZONTAL,value=0,length=400,command=slide)
+music_slider.grid(row=0,column=0,pady=(40,20),columnspan=13)
+
+global display
+display=True
+# Create volume Button
+
+volumeButton=Button(master=volumeFrame,image=volume_image,bd=0,command=display_volume_meter)
+volumeButton.grid(row=1,column=0,sticky="w")
 
 # Create status bar
 
