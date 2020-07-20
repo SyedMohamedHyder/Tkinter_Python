@@ -1,13 +1,18 @@
 #!/c/Users/SYED/AppData/Local/Programs/Python/Python38-32/python
 
+# Import all modules 
+
 from tkinter import *
 import pygame
 from tkinter import filedialog
 import os
+import time
+from mutagen.mp3 import MP3
+from tkinter import ttk
 
 window=Tk()
 window.title("MP3 Player")
-window.geometry("500x300")
+window.geometry("500x450")
 
 song_path_list=[]
 paused=False
@@ -70,26 +75,148 @@ def pause(song_paused):
 
 # Function to stop the music
 
+global stopped
+stopped=False
+
 def stop():
 
 	global paused
+	global playing
 
 	paused=False
 	pygame.mixer.music.stop()
 	song_box.selection_clear(0,END)
 	#song_box.activate(None)
 
+	# Clear the statusbar when stopped
+	status_bar.config(text="")
+
+	# When stopped a song the slider should go to the value of 0
+	music_slider.config(value=0)
+
+	global stopped
+
+	playing=False
+	stopped=True
+
+# Create a slide function which reacts upon the movement slider
+
+def slide(event):
+
+	global song
+	global paused
+	#global current_time
+
+	if stopped or not playing:
+
+		return
+
+	# When the slider is moved , get its value and start the song from there
+
+	#current_time=music_slider.get()
+
+	#song_number=song_box.curselection()[0]
+	#song_name=song_box.get(song_number)
+	#song_path=song_path_list[song_number]
+	#song_extension=".mp3"
+	#song="{}/{}{}".format(song_path,song_name,song_extension)
+
+	paused=False
+	pygame.mixer.music.load(song)
+	pygame.mixer.music.play(loops=0,start=int(music_slider.get()))
+
+# Create function to update playtime
+
+def playtime():
+
+	if stopped:
+
+		return
+
+	global current_time
+	global formatted_song_length
+	global paused
+
+	current_time=int(pygame.mixer.music.get_pos() / 1000)
+	formatted_current_time=time.strftime("%H:%M:%S",time.gmtime(current_time))
+
+	global song_path_list
+
+	#paused=False (Big Error)
+
+	if not song_box.curselection():
+
+		return
+
+	#song_number=song_box.curselection()[0]
+	#song_name=song_box.get(song_number)
+	#song_path=song_path_list[song_number]
+	#song_extension=".mp3"
+	#song="{}/{}{}".format(song_path,song_name,song_extension)
+
+	#song_muta=MP3(song)
+	#song_length=int(song_muta.info.length)
+	#formatted_song_length=time.strftime("%H:%M:%S",time.gmtime(song_length))
+
+	if int(music_slider.get()) == song_length:
+
+		music_slider.config(value=song_length)
+		#formatted_new_time=time.strftime("%H:%M:%S",time.gmtime(music_slider.get()))
+		status_bar.config(text="Time elapsed : {} of Total time : {}".format(formatted_song_length,formatted_song_length))
+
+	elif paused:
+
+		pass
+
+	# Check whether the slider and current_time are moving together
+
+	elif int(music_slider.get()) == current_time:
+
+		music_slider.config(value=current_time)
+		status_bar.config(text="Time elapsed : {} of Total time : {}".format(formatted_current_time,formatted_song_length))
+
+
+	else:
+
+		music_slider.config(value=int(music_slider.get()))
+		formatted_new_time=time.strftime("%H:%M:%S",time.gmtime(int(music_slider.get())))
+		status_bar.config(text="Time elapsed : {} of Total time : {}".format(formatted_new_time,formatted_song_length))
+		next_time=int(music_slider.get())+1
+		music_slider.config(value=next_time)
+
+	# Update the 'to' value of music_slider to the song_length
+
+	#music_slider.config(value=current_time)
+
+	#dummy_label.config(text=f"{int(music_slider.get())}   {current_time}")
+
+	#status_bar.config(text="Time elapsed : {} of Total time : {}".format(formatted_current_time,formatted_song_length))
+
+	# Update status bar every second
+
+	status_bar.after(1000,playtime)
+
+
 # Function to play a song
+
+global playing
+playing=False
 
 def play():
 
+	global stopped
 	global song_path_list
 	global paused
+	global song
+	global playing
 
+	stopped=False
 	paused=False
 
 	if not song_box.curselection():
 		return
+
+	music_slider.config(value=0)
 
 	song_number=song_box.curselection()[0]
 	song_name=song_box.get(song_number)
@@ -102,15 +229,40 @@ def play():
 	pygame.mixer.music.load(song)
 	pygame.mixer.music.play(loops=0)
 
+	global formatted_song_length
+	global song_length
+
+	song_muta=MP3(song)
+	song_length=int(song_muta.info.length)
+	formatted_song_length=time.strftime("%H:%M:%S",time.gmtime(song_length))
+
+	music_slider.config(to=song_length)
+
+	#song_box.config(state=DISABLED)
+
+	# Call playtime function which updates the playtime every second
+	if playing:
+
+		return
+
+	playtime()
+	playing=True
+
 def backward():
 
 	global song_path_list
 	global paused
+	global song
+	global stopped
+	global playing
 
+	stopped=False
 	paused=False
 
 	if not song_box.curselection():
 		return
+
+	music_slider.config(value=0)
 
 	previous_song_num=song_box.curselection()[0]-1
 
@@ -131,16 +283,37 @@ def backward():
 	pygame.mixer.music.load(song)
 	pygame.mixer.music.play(loops=0)
 
+	global formatted_song_length
+	global song_length
+
+	song_muta=MP3(song)
+	song_length=int(song_muta.info.length)
+	formatted_song_length=time.strftime("%H:%M:%S",time.gmtime(song_length))
+
+	music_slider.config(to=song_length)
+
+	if playing:
+
+		return
+
+	playtime()
+	playing=True
 
 def forward():
 
 	global song_path_list
 	global paused
+	global song
+	global stopped
+	global playing
 
 	paused=False
+	stopped=False
 
 	if not song_box.curselection():
 		return
+
+	music_slider.config(value=0)
 
 	next_song_num=song_box.curselection()[0]+1
 
@@ -161,13 +334,29 @@ def forward():
 	pygame.mixer.music.load(song)
 	pygame.mixer.music.play(loops=0)
 
+	global formatted_song_length
+	global song_length
+
+	song_muta=MP3(song)
+	song_length=int(song_muta.info.length)
+	formatted_song_length=time.strftime("%H:%M:%S",time.gmtime(song_length))
+
+	music_slider.config(to=song_length)
+
+	if playing:
+
+		return
+
+	playtime()
+	playing=True
+
 def delete_song():
 
 	global song_path_list
 
 	if  not song_box.curselection():
 		return
-		
+
 	song_to_be_deleted=song_box.curselection()[0]
 	song_box.delete(song_to_be_deleted)
 	del song_path_list[song_to_be_deleted]
@@ -181,7 +370,12 @@ def delete_many_songs():
 	song_path_list=[]
 	stop()
 
+def volume(event):
 
+	# Change volume according to the volume_meter value
+	# pygame has a volume range of 0 to 1
+	pygame.mixer.music.set_volume(volume_meter.get())
+	#dummy_label.config(text=volume_meter.get()*100)
 
 # Create menus for our window
 
@@ -238,6 +432,31 @@ forward_button.grid(row=0,column=4,padx=10)
 
 backward_button=Button(master=buttonFrame,image=backward_image,bd=0,command=backward)
 backward_button.grid(row=0,column=0,padx=10)
+
+# Create slider
+
+music_slider=ttk.Scale(master=window,from_=0,to=100,orient=HORIZONTAL,value=0,length=400,command=slide)
+music_slider.pack(pady=40)
+
+# Create volume Frame
+
+volumeFrame=Frame(master=window)
+volumeFrame.pack()
+
+# Create volume_meter scale 
+
+volume_meter=ttk.Scale(master=volumeFrame,from_=0,to=1,orient=HORIZONTAL,value=1,command=volume)
+volume_meter.grid(row=0,column=0,sticky="e")
+
+# Create status bar
+
+status_bar=Label(master=window,text="",bd=1,relief="groove",anchor="e")
+status_bar.pack(fill=X,ipady=3,side=BOTTOM)
+
+# Create a dummy label for analysis
+
+#dummy_label=Label(master=window,text="")
+#dummy_label.pack()
 
 
 window.mainloop()
