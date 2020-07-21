@@ -14,6 +14,7 @@ from PIL import ImageTk,Image
 window=Tk()
 window.title("MP3 Player")
 window.geometry("500x430")
+window.resizable(False,False)
 
 song_path_list=[]
 paused=False
@@ -373,21 +374,27 @@ def delete_many_songs():
 
 def volume(event):
 
+	global volume_level
 	global volume_meter
 	# Change volume according to the volume_meter value
 	# pygame has a volume range of 0 to 1
-	pygame.mixer.music.set_volume(volume_meter.get())
+	volume_level=volume_meter.get()
+	pygame.mixer.music.set_volume(volume_level)
 	#dummy_label.config(text=volume_meter.get()*100)
+
+global volume_level
+volume_level=1
 
 def display_volume_meter():
 
+	global volume_level
 	global display
 	global volume_meter
 
 	if display:
 
 		# Create volume_meter scale 
-		volume_meter=ttk.Scale(master=volumeFrame,from_=0,to=1,orient=HORIZONTAL,value=1,command=volume)
+		volume_meter=ttk.Scale(master=volumeFrame,from_=0,to=1,orient=HORIZONTAL,value=volume_level,command=volume)
 		volume_meter.grid(row=1,column=1,sticky="w")
 		display=False
 
