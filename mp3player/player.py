@@ -417,11 +417,24 @@ player_menu.add_cascade(label="Delete Song",menu=delete_menu)
 delete_menu.add_command(label="Delete Selected Song",command=delete_song)
 delete_menu.add_command(label="Delete All Songs",command=delete_many_songs)
 
+# Create a frame to add scrollbar
+
+song_boxFrame=Frame(master=window)
+song_boxFrame.pack(pady=20,padx=20)
+
+# Create a scroll_bar
+
+song_box_scrollbar=Scrollbar(master=song_boxFrame,orient=VERTICAL)
+song_box_scrollbar.pack(side=RIGHT,fill=Y)
 
 # Create a song box 
 
-song_box=Listbox(master=window,bg="white",fg="black",width=75,selectbackground="black",selectforeground="white",activestyle="none",font=("Arial",10))
-song_box.pack(pady=20,padx=20)
+song_box=Listbox(master=song_boxFrame,bg="white",fg="black",width=75,selectbackground="black",selectforeground="white",activestyle="none",font=("Arial",10),yscrollcommand=song_box_scrollbar.set)
+song_box.pack()
+
+# Configure our scrollbar
+
+song_box_scrollbar.config(command=song_box.yview)
 
 # Load images for our buttons 
 
